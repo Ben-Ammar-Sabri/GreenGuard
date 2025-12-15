@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "author": "Antigravity Agent",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-dht22", "id": "dht1", "top": -80, "left": 120, "attrs": {} },
+    { "type": "wokwi-servo", "id": "servo1", "top": -80, "left": 250, "attrs": {} },
+    { "type": "wokwi-led", "id": "led-heat", "top": 80, "left": 300, "attrs": { "color": "red", "label": "Heater" } },
+    { "type": "wokwi-led", "id": "led-pump", "top": 130, "left": 300, "attrs": { "color": "blue", "label": "Pump" } },
+    { "type": "wokwi-relay-module", "id": "relay-heat", "top": 60, "left": 180, "attrs": {} },
+    { "type": "wokwi-relay-module", "id": "relay-pump", "top": 150, "left": 180, "attrs": {} },
+    { "type": "wokwi-lcd1602", "id": "lcd1", "top": -150, "left": 0, "attrs": { "pins": "i2c" } },
+    { "type": "wokwi-photoresistor-sensor", "id": "ldr1", "top": 200, "left": 0, "attrs": {} },
+    { "type": "wokwi-led", "id": "led-grow", "top": 200, "left": 120, "attrs": { "color": "magenta", "label": "Grow Light", "lightColor": "magenta" } },
+    { "type": "wokwi-pir-motion-sensor", "id": "pir1", "top": 250, "left": 200, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    
+    [ "dht1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "dht1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "dht1:SDA", "esp:15", "green", [ "v0" ] ],
+
+    [ "servo1:V+", "esp:5V", "red", [ "v0" ] ],
+    [ "servo1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "servo1:PWM", "esp:18", "orange", [ "v0" ] ],
+
+    [ "relay-heat:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "relay-heat:GND", "esp:GND.2", "black", [ "v0" ] ],
+    [ "relay-heat:IN", "esp:26", "purple", [ "v0" ] ],
+    [ "relay-heat:COM", "esp:5V", "red", [ "v0" ] ],
+    [ "relay-heat:NO", "led-heat:A", "green", [ "v0" ] ],
+    [ "led-heat:C", "esp:GND.2", "black", [ "v0" ] ],
+
+    [ "relay-pump:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "relay-pump:GND", "esp:GND.2", "black", [ "v0" ] ],
+    [ "relay-pump:IN", "esp:27", "cyan", [ "v0" ] ],
+    [ "relay-pump:COM", "esp:5V", "red", [ "v0" ] ],
+    [ "relay-pump:NO", "led-pump:A", "green", [ "v0" ] ],
+    [ "led-pump:C", "esp:GND.2", "black", [ "v0" ] ],
+
+    [ "lcd1:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "lcd1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "lcd1:SDA", "esp:21", "blue", [ "v0" ] ],
+    [ "lcd1:SCL", "esp:22", "yellow", [ "v0" ] ],
+
+    [ "ldr1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "ldr1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "ldr1:AO", "esp:34", "gray", [ "v0" ] ],
+
+    [ "led-grow:A", "esp:14", "magenta", [ "v0" ] ],
+    [ "led-grow:C", "esp:GND.2", "black", [ "v0" ] ],
+
+    [ "pir1:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "pir1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "pir1:OUT", "esp:13", "brown", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenGuard - Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #1a1a2e;
+            --card-bg: #16213e;
+            --accent: #0f3460;
+            --primary: #e94560;
+            --text-main: #ecf0f1;
+            --green: #2ecc71;
+            --blue: #3498db;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: var(--green);
+        }
+
+        .subtitle {
+            color: #95a5a6;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+        }
+
+        .metric-value {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-unit {
+            font-size: 1.2rem;
+            color: #95a5a6;
+        }
+
+        .settings-overlay {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .setting-input {
+            background: transparent;
+            border: 1px solid #95a5a6;
+            color: white;
+            padding: 5px;
+            width: 60px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .setting-label {
+            font-size: 0.8rem;
+            color: #95a5a6;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .status-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .active {
+            border: 1px solid var(--green);
+            color: var(--green);
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.2);
+        }
+
+        .inactive {
+            border: 1px solid #7f8c8d;
+            color: #7f8c8d;
+            opacity: 0.5;
+        }
+
+        /* Stealth Inputs for God Mode */
+        .stealth-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 3.5rem;
+            font-weight: bold;
+            width: 140px;
+            text-align: center;
+            font-family: inherit;
+        }
+
+        .stealth-input:focus {
+            outline: none;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* Remove arrows from number inputs */
+        .stealth-input::-webkit-outer-spin-button,
+        .stealth-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .info-badge {
+            font-size: 0.85rem;
+            color: #bdc3c7;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 5px 0 15px 0;
+            line-height: 1.4;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            right: 0;
+            background-color: var(--card-bg);
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-content {
+            padding: 20px;
+            color: var(--text-main);
+            width: 300px;
+            /* Fixed width for content */
+        }
+
+        .sidebar h2 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+        }
+
+        .config-group {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .closebtn {
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 36px;
+            color: #bdc3c7;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .closebtn:hover {
+            color: var(--primary);
+        }
+
+        .config-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+            z-index: 999;
+            transition: transform 0.3s;
+        }
+
+        .config-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        /* Controls */
+        .controls-bar {
+            grid-column: 1 / -1;
+            background: var(--accent);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-mode {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-action {
+            background: var(--blue);
+            color: white;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .btn-action.enabled {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .btn-demo {
+            background: linear-gradient(45deg, #f1c40f, #e67e22);
+            color: black;
+        }
+
+        #cnx-status {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div>
+                <h1><i class="fas fa-leaf"></i> GreenGuard</h1>
+                <div class="subtitle">Serre Autonome Connectée</div>
+            </div>
+            <div id="cnx-status" style="color:red">🔴 DÉCONNECTÉ</div>
+        </header>
+
+        <!-- Temperature Card -->
+        <div class="card">
+            <h3><i class="fas fa-thermometer-half"></i> Température</h3>
+            <div class="metric-value">
+                <input type="number" id="val-temp" class="stealth-input" value="--" onchange="sendDirectSim()">
+                <span class="metric-unit">°C</span>
+            </div>
+
+            <div class="info-badge">
+                <i class="fas fa-info-circle"></i>
+                Chauffage si < <span id="lbl-min-t">18</span>°C <br>
+                    Ventilo si > <span id="lbl-max-t">28</span>°C
+            </div>
+
+            <div class="status-grid">
+                <div id="st-heat" class="status-item inactive"><i class="fas fa-fire"></i> Chauffage</div>
+                <div id="st-fan" class="status-item inactive"><i class="fas fa-wind"></i> Ventilo</div>
+            </div>
+        </div>
+
+        <!-- Humidity Card -->
+        <div class="card">
+            <h3><i class="fas fa-tint"></i> Humidité Sol</h3>
+            <div class="metric-value">
+                <input type="number" id="val-hum" class="stealth-input" value="--" onchange="sendDirectSim()">
+                <span class="metric-unit">%</span>
+            </div>
+
+            <div class="info-badge">
+                <i class="fas fa-info-circle"></i>
+                Arrosage si < <span id="lbl-min-h">40</span>%
+            </div>
+
+            <div class="status-grid">
+                <div id="st-pump" class="status-item inactive" style="grid-column: 1 / -1">
+                    <i class="fas fa-faucet"></i> Pompe Arrosage
+                </div>
+            </div>
+        </div>
+
+        <!-- Light Card -->
+        <div class="card">
+            <h3><i class="fas fa-sun"></i> Luminosité</h3>
+            <div class="metric-value">
+                <input type="number" id="val-lux" class="stealth-input" value="--" step="100"
+                    onchange="sendDirectSim()">
+                <span class="metric-unit">Lux</span>
+            </div>
+
+            <!-- Day/Night Quick Toggles -->
+            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:10px;">
+                <button class="btn" style="background:#f1c40f; color:#000; padding:5px 10px; font-size:12px;"
+                    onclick="setLuxMode('DAY')">
+                    <i class="fas fa-sun"></i> Jour
+                </button>
+                <button class="btn" style="background:#2c3e50; color:#fff; padding:5px 10px; font-size:12px;"
+                    onclick="setLuxMode('NIGHT')">
+                    <i class="fas fa-moon"></i> Nuit
+                </button>
+            </div>
+
+            <div class="info-badge">
+                <i class="fas fa-regular fa-lightbulb"></i>
+                Allumage si < <span id="lbl-min-l">2000</span> Lux
+            </div>
+
+            <div class="status-grid">
+                <div id="st-light" class="status-item inactive" style="grid-column: 1 / -1">
+                    <i class="fas fa-lightbulb"></i> Lampes UV
+                </div>
+            </div>
+        </div>
+
+        <!-- SIMULATION MODE CARD (Hidden by default) -->
+        <div class="card" id="card-sim" style="display:none; border: 2px solid #e91e63;">
+            <h3><i class="fas fa-magic"></i> Simulation (God Mode)</h3>
+            <p style="text-align:center; opacity:0.7">Override sensors values</p>
+
+            <div class="settings-overlay" style="display:block">
+                <div style="margin-bottom:10px">
+                    <span class="setting-label">Temperature: <span id="val-sim-t">20</span>°C</span>
+                    <input type="range" id="sim-t" min="0" max="50" step="0.5" value="20" oninput="sendSim()"
+                        style="width:100%">
+                </div>
+                <div style="margin-bottom:10px">
+                    <span class="setting-label">Humidity: <span id="val-sim-h">50</span>%</span>
+                    <input type="range" id="sim-h" min="0" max="100" step="1" value="50" oninput="sendSim()"
+                        style="width:100%">
+                </div>
+                <div>
+                    <span class="setting-label">Light: <span id="val-sim-l">2000</span> Lux</span>
+                    <input type="range" id="sim-l" min="0" max="4095" step="50" value="2000" oninput="sendSim()"
+                        style="width:100%">
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <!-- Demo Randomizer -->
+            <button class="btn btn-demo" id="btn-demo" onclick="toggleDemo()">
+                <i class="fas fa-dice"></i> <span id="lbl-demo">DEMO OFF</span>
+            </button>
+        </div>
+
+        <!-- Charts Grid -->
+        <div
+            style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div class="card">
+                <canvas id="tempChart" height="150"></canvas>
+            </div>
+            <div class="card">
+                <canvas id="humChart" height="150"></canvas>
+            </div>
+            <div class="card">
+                <canvas id="luxChart" height="150"></canvas>
+            </div>
+        </div>
+
+        <!-- System Rules (Removed from here, moved to Sidebar) -->
+    </div>
+
+    <!-- Config Trigger Button -->
+    <button class="config-btn" onclick="openConfig()"><i class="fas fa-sliders-h"></i></button>
+
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeConfig()">&times;</a>
+        <div class="sidebar-content">
+            <h2><i class="fas fa-cogs"></i> Configuration</h2>
+
+            <div class="config-group">
+                <label class="setting-label"><i class="fas fa-thermometer-half"></i> Température (°C)</label>
+                <div style="display:flex; justify-content:space-between; margin-top:10px">
+                    <div>
+                        <small>Min (Chauffage)</small><br>
+                        <input type="number" class="setting-input" id="set-min-t" value="18.0" step="0.5"
+                            onchange="pushSettings()">
+                    </div>
+                    <div>
+                        <small>Max (Ventilo)</small><br>
+                        <input type="number" class="setting-input" id="set-max-t" value="28.0" step="0.5"
+                            onchange="pushSettings()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-group">
+                <label class="setting-label"><i class="fas fa-tint"></i> Humidité Sol (%)</label>
+                <div style="margin-top:10px">
+                    <small>Min (Arrosage)</small><br>
+                    <input type="number" class="setting-input" id="set-min-h" value="40" step="1"
+                        onchange="pushSettings()">
+                </div>
+            </div>
+
+            <div class="config-group">
+                <label class="setting-label"><i class="fas fa-sun"></i> Luminosité (Lux)</label>
+                <div style="margin-top:10px">
+                    <small>Seuil Allumage (<)< /small><br>
+                            <input type="number" class="setting-input" id="set-min-l" value="2000" step="100"
+                                onchange="pushSettings()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- MQTT ---
+        const broker = "broker.hivemq.com";
+        const port = 8884; // WebSocket Secure Port (HiveMQ)
+        const topicData = "greenguard/data";
+        const topicControl = "greenguard/control";
+        const topicSettings = "greenguard/settings";
+        const topicAlarm = "greenguard/alarm";
+
+        let client = new Paho.MQTT.Client(broker, port, "web_gg_" + Math.random().toString(16).substr(2));
+
+        // --- State ---
+        let isAuto = true;
+        let isDemo = false;
+        let demoInterval = null;
+
+        // Actuators local state for toggling
+        let stFan = false;
+        let stPump = false;
+
+        // --- Chart ---
+        // --- Charts ---
+        const commonOptions = {
+            responsive: true,
+            animation: false,
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { display: false } } // Hide legend for cleaner look
+        };
+
+        const ctxT = document.getElementById('tempChart').getContext('2d');
+        const tempChart = new Chart(ctxT, {
+            type: 'line',
+            data: {
+                labels: Array(20).fill(''),
+                datasets: [{ label: 'Temp °C', data: [], borderColor: '#e94560', tension: 0.4, borderWidth: 2, pointRadius: 0 }]
+            },
+            options: { ...commonOptions, plugins: { title: { display: true, text: 'Température (°C)', color: '#e94560' } } }
+        });
+
+        const ctxH = document.getElementById('humChart').getContext('2d');
+        const humChart = new Chart(ctxH, {
+            type: 'line',
+            data: {
+                labels: Array(20).fill(''),
+                datasets: [{ label: 'Hum %', data: [], borderColor: '#3498db', tension: 0.4, borderWidth: 2, pointRadius: 0 }]
+            },
+            options: { ...commonOptions, plugins: { title: { display: true, text: 'Humidité (%)', color: '#3498db' } } }
+        });
+
+        const ctxL = document.getElementById('luxChart').getContext('2d');
+        const luxChart = new Chart(ctxL, {
+            type: 'line',
+            data: {
+                labels: Array(20).fill(''),
+                datasets: [{ label: 'Lux', data: [], borderColor: '#f1c40f', tension: 0.4, borderWidth: 2, pointRadius: 0 }]
+            },
+            options: { ...commonOptions, plugins: { title: { display: true, text: 'Luminosité (Lux)', color: '#f1c40f' } } }
+        });
+
+        // --- Logic ---
+        function connect() {
+            client.connect({ onSuccess: onConnect, useSSL: true, onFailure: () => setTimeout(connect, 3000) });
+        }
+
+        function onConnect() {
+            document.getElementById("cnx-status").innerHTML = "🟢 CONNECTÉ";
+            document.getElementById("cnx-status").style.color = "#2ecc71";
+            client.subscribe(topicData);
+            client.subscribe(topicAlarm);
+        }
+
+        client.onConnectionLost = (resp) => {
+            document.getElementById("cnx-status").innerHTML = "🔴 DÉCONNECTÉ";
+            document.getElementById("cnx-status").style.color = "red";
+            setTimeout(connect, 3000);
+        };
+
+        client.onMessageArrived = (msg) => {
+            if (msg.destinationName === topicData) {
+                const data = JSON.parse(msg.payloadString);
+                updateUI(data);
+            } else if (msg.destinationName === topicAlarm) {
+                alert("🚨 ALERTE : " + msg.payloadString);
+            }
+        };
+
+        function updateUI(data) {
+            // Update Inputs only if user is not typing in them
+            if (document.activeElement.id !== "val-temp") document.getElementById("val-temp").value = data.temp.toFixed(1);
+            if (document.activeElement.id !== "val-hum") document.getElementById("val-hum").value = data.hum.toFixed(0);
+            if (document.activeElement.id !== "val-lux") document.getElementById("val-lux").value = data.lux;
+
+            // Status
+            setClass("st-heat", data.heat);
+            setClass("st-fan", data.fan);
+            setClass("st-pump", data.pump);
+            setClass("st-light", data.light);
+
+            // Sync States
+            stFan = data.fan;
+            stPump = data.pump;
+            isAuto = data.auto;
+
+            // Update Charts
+            function updateChartData(chart, val) {
+                if (chart.data.datasets[0].data.length > 20) chart.data.datasets[0].data.shift();
+                chart.data.datasets[0].data.push(val);
+                chart.update();
+            }
+            updateChartData(tempChart, data.temp);
+            updateChartData(humChart, data.hum);
+            updateChartData(luxChart, data.lux);
+        }
+
+        function setClass(id, isActive) {
+            const el = document.getElementById(id);
+            if (isActive) {
+                el.classList.remove("inactive");
+                el.classList.add("active");
+            } else {
+                el.classList.remove("active");
+                el.classList.add("inactive");
+            }
+        }
+
+        // --- Commands ---
+
+        // --- Commands ---
+        // (Manual controls removed)
+
+        function sendCmd(cmd) {
+            let message = new Paho.MQTT.Message(cmd);
+            message.destinationName = topicControl;
+            client.send(message);
+        }
+
+        // --- Simulation (God Mode: Direct Click) ---
+        function setLuxMode(mode) {
+            const input = document.getElementById("val-lux");
+            if (mode === 'DAY') input.value = 5000;
+            if (mode === 'NIGHT') input.value = 100;
+            sendDirectSim();
+        }
+
+        function sendDirectSim() {
+            const t = parseFloat(document.getElementById("val-temp").value);
+            const h = parseFloat(document.getElementById("val-hum").value);
+            const l = parseFloat(document.getElementById("val-lux").value);
+
+            // 1. Instant Local Update (UX)
+            if (!isNaN(t)) {
+                if (tempChart.data.datasets[0].data.length > 20) tempChart.data.datasets[0].data.shift();
+                tempChart.data.datasets[0].data.push(t);
+                tempChart.update();
+            }
+            if (!isNaN(h)) {
+                if (humChart.data.datasets[0].data.length > 20) humChart.data.datasets[0].data.shift();
+                humChart.data.datasets[0].data.push(h);
+                humChart.update();
+            }
+            if (!isNaN(l)) {
+                if (luxChart.data.datasets[0].data.length > 20) luxChart.data.datasets[0].data.shift();
+                luxChart.data.datasets[0].data.push(l);
+                luxChart.update();
+            }
+
+            // 2. Predictive Status Update (Instant Feedback)
+            // Read current thresholds
+            const minT = parseFloat(document.getElementById("set-min-t").value);
+            const maxT = parseFloat(document.getElementById("set-max-t").value);
+            const minH = parseFloat(document.getElementById("set-min-h").value);
+            const minL = parseFloat(document.getElementById("set-min-l").value);
+
+            // Apply Logic Locally for UI
+            if (!isNaN(t)) {
+                setClass("st-heat", t < minT);
+                setClass("st-fan", t > maxT);
+            }
+            if (!isNaN(h)) setClass("st-pump", h < minH);
+            if (!isNaN(l)) setClass("st-light", l < minL);
+
+            // Send to ESP32 (Auto-enables simulation mode)
+            const payload = JSON.stringify({ active: true, t: t, h: h, l: l });
+            let message = new Paho.MQTT.Message(payload);
+            message.destinationName = "greenguard/simulation";
+            client.send(message);
+            console.log("🧞 God Mode Direct:", t, h, l);
+        }
+
+        // --- Sidebar Logic ---
+        function openConfig() {
+            document.getElementById("mySidebar").style.width = "350px";
+        }
+
+        function closeConfig() {
+            document.getElementById("mySidebar").style.width = "0";
+        }
+
+        // --- Settings & Demo ---
+        let debounceTimer = null;
+
+        function pushSettings() {
+            // Debounce: wait 1s before sending
+            if (debounceTimer) clearTimeout(debounceTimer);
+
+            const minT = parseFloat(document.getElementById("set-min-t").value);
+            const maxT = parseFloat(document.getElementById("set-max-t").value);
+            const minH = parseFloat(document.getElementById("set-min-h").value);
+            const minL = parseFloat(document.getElementById("set-min-l").value);
+
+            // Update Badges Visuals Immediately
+            document.getElementById("lbl-min-t").innerText = minT;
+            document.getElementById("lbl-max-t").innerText = maxT;
+            document.getElementById("lbl-min-h").innerText = minH;
+            document.getElementById("lbl-min-l").innerText = minL;
+
+            debounceTimer = setTimeout(() => {
+                const payload = JSON.stringify({ "min_t": minT, "max_t": maxT, "min_h": minH, "min_l": minL });
+                let message = new Paho.MQTT.Message(payload);
+                message.destinationName = topicSettings;
+                client.send(message);
+                console.log("📨 SENT:", payload);
+            }, 1000);
+        }
+
+        function toggleDemo() {
+            isDemo = !isDemo;
+            const btn = document.getElementById("btn-demo");
+            const lbl = document.getElementById("lbl-demo");
+
+            if (isDemo) {
+                btn.style.animation = "pulse 1s infinite";
+                lbl.innerText = "DEMO ACTIVE";
+                lbl.innerText = "DEMO ACTIVE";
+
+                // Chaos Mode: Change SENSORS randomly every 3 seconds (Hardware reacts to this)
+                demoInterval = setInterval(() => {
+                    // Random Sensor Values
+                    const rTemp = (18 + Math.random() * 15).toFixed(1); // 18-33°C
+                    const rHum = (30 + Math.random() * 50).toFixed(0);  // 30-80%
+                    const rLux = (Math.random() > 0.5) ? 4500 : 500;    // Day or Night
+
+                    // Update inputs visual
+                    document.getElementById("val-temp").value = rTemp;
+                    document.getElementById("val-hum").value = rHum;
+                    document.getElementById("val-lux").value = rLux;
+
+                    // Trigger Simulation
+                    sendDirectSim();
+                    console.log("🎲 Demo Sim:", rTemp, rHum, rLux);
+                }, 3000);
+
+            } else {
+                btn.style.animation = "none";
+                lbl.innerText = "DEMO OFF";
+                clearInterval(demoInterval);
+            }
+        }
+
+        // --- Chart Keep-Alive (Every 10s) ---
+        setInterval(() => {
+            // Push same last value if no update to keep chart moving time-wise
+            const t = parseFloat(document.getElementById("val-temp").value);
+            const h = parseFloat(document.getElementById("val-hum").value);
+            const l = parseFloat(document.getElementById("val-lux").value);
+
+            if (!isNaN(t)) {
+                if (tempChart.data.datasets[0].data.length > 20) tempChart.data.datasets[0].data.shift();
+                tempChart.data.datasets[0].data.push(t);
+                tempChart.update();
+            }
+            if (!isNaN(h)) {
+                if (humChart.data.datasets[0].data.length > 20) humChart.data.datasets[0].data.shift();
+                humChart.data.datasets[0].data.push(h);
+                humChart.update();
+            }
+            if (!isNaN(l)) {
+                if (luxChart.data.datasets[0].data.length > 20) luxChart.data.datasets[0].data.shift();
+                luxChart.data.datasets[0].data.push(l);
+                luxChart.update();
+            }
+        }, 10000);
+
+
+        // Init
+        connect();
+
+    </script>
+</body>
+
+</html>
