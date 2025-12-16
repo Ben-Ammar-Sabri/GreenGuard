@@ -11,13 +11,15 @@
 
     <style>
         :root {
-            --bg-dark: #1a1a2e;
-            --card-bg: #16213e;
-            --accent: #0f3460;
-            --primary: #e94560;
-            --text-main: #ecf0f1;
-            --green: #2ecc71;
-            --blue: #3498db;
+            --bg-dark: #faedca;
+            --card-bg: #c1dbb3;
+            --accent: #7ebc89;
+            --primary: #1e4d2b;
+            --text-main: #1a3c26;
+            --text-muted: #3d5a45;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --warning: #e4910b;
         }
 
         body {
@@ -53,11 +55,12 @@
         h1 {
             margin: 0;
             font-size: 2rem;
-            color: var(--green);
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
         }
 
         .subtitle {
-            color: #95a5a6;
+            color: var(--text-muted);
             font-size: 0.9rem;
         }
 
@@ -75,39 +78,12 @@
             font-weight: bold;
             margin: 10px 0;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
         }
 
         .metric-unit {
             font-size: 1.2rem;
-            color: #95a5a6;
-        }
-
-        .settings-overlay {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 15px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .setting-input {
-            background: transparent;
-            border: 1px solid #95a5a6;
-            color: white;
-            padding: 5px;
-            width: 60px;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 1rem;
-        }
-
-        .setting-label {
-            font-size: 0.8rem;
-            color: #95a5a6;
-            display: block;
-            margin-bottom: 5px;
+            color: var(--text-muted);
         }
 
         .status-grid {
@@ -118,57 +94,82 @@
         }
 
         .status-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px;
+            padding: 12px;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 1px solid transparent;
         }
 
         .active {
-            border: 1px solid var(--green);
-            color: var(--green);
-            box-shadow: 0 0 10px rgba(46, 204, 113, 0.2);
+            background: rgba(0, 184, 148, 0.15);
+            border: 2px solid var(--success);
+            color: var(--success);
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
         }
 
         .inactive {
-            border: 1px solid #7f8c8d;
-            color: #7f8c8d;
-            opacity: 0.5;
+            background: #f1f2f6;
+            border: 1px solid #dfe4ea;
+            color: #a4b0be;
         }
 
-        /* Stealth Inputs for God Mode */
-        .stealth-input {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 3.5rem;
-            font-weight: bold;
-            width: 140px;
-            text-align: center;
-            font-family: inherit;
+        .motion-active {
+            background: rgba(231, 76, 60, 0.15);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+            animation: pulse-motion 1s infinite;
         }
 
-        .stealth-input:focus {
-            outline: none;
-            border-bottom: 2px solid var(--primary);
-        }
+        @keyframes pulse-motion {
+            0% {
+                transform: scale(1);
+            }
 
-        /* Remove arrows from number inputs */
-        .stealth-input::-webkit-outer-spin-button,
-        .stealth-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+            50% {
+                transform: scale(1.02);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         .info-badge {
-            font-size: 0.85rem;
-            color: #bdc3c7;
-            background: rgba(255, 255, 255, 0.08);
-            padding: 8px 12px;
-            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #e8f5e9;
+            background: #3d5a45;
+            padding: 10px 20px;
+            border-radius: 50px;
             display: inline-block;
-            margin: 5px 0 15px 0;
-            line-height: 1.4;
+            margin: 10px 0 20px 0;
+            line-height: 1.5;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #2d4030;
+        }
+
+        .info-badge span {
+            font-weight: 800;
+            color: #a3e4d7;
+            font-size: 1.0rem;
+        }
+
+        .info-badge i {
+            color: #a3e4d7;
+            margin-right: 8px;
+        }
+
+        .metric-wrapper {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 5px;
         }
 
         /* Sidebar */
@@ -179,7 +180,7 @@
             z-index: 1000;
             top: 0;
             right: 0;
-            background-color: var(--card-bg);
+            background-color: #a9dfbf;
             overflow-x: hidden;
             transition: 0.5s;
             padding-top: 60px;
@@ -190,7 +191,6 @@
             padding: 20px;
             color: var(--text-main);
             width: 300px;
-            /* Fixed width for content */
         }
 
         .sidebar h2 {
@@ -202,9 +202,36 @@
 
         .config-group {
             margin-bottom: 25px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.4);
             padding: 15px;
             border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .config-group small {
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 700;
+            color: #145a32;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .setting-label {
+            font-weight: bold;
+            color: #0b5345;
+            font-size: 1rem;
+        }
+
+        .setting-input {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-main);
+            padding: 5px;
+            width: 60px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1rem;
         }
 
         .closebtn {
@@ -242,56 +269,49 @@
             transform: rotate(90deg);
         }
 
-        /* Controls */
-        .controls-bar {
-            grid-column: 1 / -1;
-            background: var(--accent);
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .btn {
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.1s;
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-mode {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-action {
-            background: var(--blue);
-            color: white;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        .btn-action.enabled {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .btn-demo {
-            background: linear-gradient(45deg, #f1c40f, #e67e22);
-            color: black;
-        }
-
         #cnx-status {
             font-weight: bold;
+        }
+
+        /* Time Simulation Buttons */
+        .btn-time {
+            opacity: 0.5;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            filter: grayscale(0.6);
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn-time:hover {
+            opacity: 0.8;
+            filter: grayscale(0);
+        }
+
+        .btn-time.active {
+            opacity: 1;
+            transform: scale(1.05);
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            filter: grayscale(0);
+            font-weight: bold;
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -304,14 +324,20 @@
                 <h1><i class="fas fa-leaf"></i> GreenGuard</h1>
                 <div class="subtitle">Serre Autonome Connectée</div>
             </div>
-            <div id="cnx-status" style="color:red">🔴 DÉCONNECTÉ</div>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <button id="btn-simulate" class="btn-time" style="background:#9b59b6; color:#fff; padding:10px 20px;"
+                    onclick="toggleSimulation()">
+                    <i class="fas fa-magic"></i> Simuler
+                </button>
+                <div id="cnx-status" style="color:red">🔴 DÉCONNECTÉ</div>
+            </div>
         </header>
 
         <!-- Temperature Card -->
         <div class="card">
             <h3><i class="fas fa-thermometer-half"></i> Température</h3>
-            <div class="metric-value">
-                <input type="number" id="val-temp" class="stealth-input" value="--" onchange="sendDirectSim()">
+            <div class="metric-wrapper">
+                <span id="val-temp" class="metric-value">--</span>
                 <span class="metric-unit">°C</span>
             </div>
 
@@ -330,8 +356,8 @@
         <!-- Humidity Card -->
         <div class="card">
             <h3><i class="fas fa-tint"></i> Humidité Sol</h3>
-            <div class="metric-value">
-                <input type="number" id="val-hum" class="stealth-input" value="--" onchange="sendDirectSim()">
+            <div class="metric-wrapper">
+                <span id="val-hum" class="metric-value">--</span>
                 <span class="metric-unit">%</span>
             </div>
 
@@ -347,69 +373,60 @@
             </div>
         </div>
 
-        <!-- Light Card -->
+        <!-- Light & Security Card -->
         <div class="card">
-            <h3><i class="fas fa-sun"></i> Luminosité</h3>
-            <div class="metric-value">
-                <input type="number" id="val-lux" class="stealth-input" value="--" step="100"
-                    onchange="sendDirectSim()">
+            <h3><i class="fas fa-sun"></i> Luminosité & Sécurité</h3>
+            <div class="metric-wrapper">
+                <span id="val-lux" class="metric-value">--</span>
                 <span class="metric-unit">Lux</span>
             </div>
 
-            <!-- Day/Night Quick Toggles -->
+            <!-- Time Display -->
+            <div id="time-display"
+                style="font-size: 1.2rem; margin-bottom: 15px; color: var(--text-main); font-weight:bold; margin-top: 15px;">
+                <i class="far fa-clock"></i> <span id="val-time">--:--</span>
+                <span id="val-daynight"
+                    style="font-size: 0.8rem; background: #333; padding: 4px 8px; border-radius: 6px; margin-left: 10px; vertical-align: middle;">--</span>
+            </div>
+
+            <!-- Time Demo Controls -->
             <div style="display:flex; justify-content:center; gap:10px; margin-bottom:10px;">
-                <button class="btn" style="background:#f1c40f; color:#000; padding:5px 10px; font-size:12px;"
-                    onclick="setLuxMode('DAY')">
-                    <i class="fas fa-sun"></i> Jour
+                <button id="btn-sim-day" class="btn-time" style="background:#f39c12; color:#fff;"
+                    onclick="setTimeDemo(12)">
+                    <i class="fas fa-sun"></i> Jour (12h)
                 </button>
-                <button class="btn" style="background:#2c3e50; color:#fff; padding:5px 10px; font-size:12px;"
-                    onclick="setLuxMode('NIGHT')">
-                    <i class="fas fa-moon"></i> Nuit
+                <button id="btn-sim-night" class="btn-time" style="background:#34495e; color:#fff;"
+                    onclick="setTimeDemo(23)">
+                    <i class="fas fa-moon"></i> Nuit (23h)
+                </button>
+                <button id="btn-sim-auto" class="btn-time active" style="background:#27ae60; color:#fff;"
+                    onclick="setRealTime()">
+                    <i class="fas fa-clock"></i> Auto
                 </button>
             </div>
+
+            <!-- INTRUSION ALERT (Hidden by default) -->
+            <div id="alert-box"
+                style="display:none; background: #c0392b; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; animation: flash 0.5s infinite;">
+                <i class="fas fa-exclamation-triangle"></i> <strong>ALERTE INTRUSION !</strong><br>
+                Mouvement détecté !
+            </div>
+            <audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+                preload="auto"></audio>
 
             <div class="info-badge">
                 <i class="fas fa-regular fa-lightbulb"></i>
-                Allumage si < <span id="lbl-min-l">2000</span> Lux
+                Allumage si < <span id="lbl-min-l">500</span> Lux
             </div>
 
             <div class="status-grid">
-                <div id="st-light" class="status-item inactive" style="grid-column: 1 / -1">
+                <div id="st-light" class="status-item inactive">
                     <i class="fas fa-lightbulb"></i> Lampes UV
                 </div>
-            </div>
-        </div>
-
-        <!-- SIMULATION MODE CARD (Hidden by default) -->
-        <div class="card" id="card-sim" style="display:none; border: 2px solid #e91e63;">
-            <h3><i class="fas fa-magic"></i> Simulation (God Mode)</h3>
-            <p style="text-align:center; opacity:0.7">Override sensors values</p>
-
-            <div class="settings-overlay" style="display:block">
-                <div style="margin-bottom:10px">
-                    <span class="setting-label">Temperature: <span id="val-sim-t">20</span>°C</span>
-                    <input type="range" id="sim-t" min="0" max="50" step="0.5" value="20" oninput="sendSim()"
-                        style="width:100%">
-                </div>
-                <div style="margin-bottom:10px">
-                    <span class="setting-label">Humidity: <span id="val-sim-h">50</span>%</span>
-                    <input type="range" id="sim-h" min="0" max="100" step="1" value="50" oninput="sendSim()"
-                        style="width:100%">
-                </div>
-                <div>
-                    <span class="setting-label">Light: <span id="val-sim-l">2000</span> Lux</span>
-                    <input type="range" id="sim-l" min="0" max="4095" step="50" value="2000" oninput="sendSim()"
-                        style="width:100%">
+                <div id="st-motion" class="status-item inactive">
+                    <i class="fas fa-walking"></i> Mouvement
                 </div>
             </div>
-        </div>
-
-        <!-- Controls Bar -->
-        <div class="controls-bar">
-            <!-- Demo Randomizer -->
-            <button class="btn btn-demo" id="btn-demo" onclick="toggleDemo()">
-                <i class="fas fa-dice"></i> <span id="lbl-demo">DEMO OFF</span>
-            </button>
         </div>
 
         <!-- Charts Grid -->
@@ -425,8 +442,6 @@
                 <canvas id="luxChart" height="150"></canvas>
             </div>
         </div>
-
-        <!-- System Rules (Removed from here, moved to Sidebar) -->
     </div>
 
     <!-- Config Trigger Button -->
@@ -466,9 +481,9 @@
             <div class="config-group">
                 <label class="setting-label"><i class="fas fa-sun"></i> Luminosité (Lux)</label>
                 <div style="margin-top:10px">
-                    <small>Seuil Allumage (<)< /small><br>
-                            <input type="number" class="setting-input" id="set-min-l" value="2000" step="100"
-                                onchange="pushSettings()">
+                    <small>Seuil Allumage <br>
+                        <input type="number" class="setting-input" id="set-min-l" value="500" step="50"
+                            onchange="pushSettings()">
                 </div>
             </div>
         </div>
@@ -476,8 +491,8 @@
 
     <script>
         // --- MQTT ---
-        const broker = "broker.hivemq.com";
-        const port = 8884; // WebSocket Secure Port (HiveMQ)
+        const broker = "broker.emqx.io";
+        const port = 8084; // WebSocket Secure Port (EMQX)
         const topicData = "greenguard/data";
         const topicControl = "greenguard/control";
         const topicSettings = "greenguard/settings";
@@ -486,51 +501,105 @@
         let client = new Paho.MQTT.Client(broker, port, "web_gg_" + Math.random().toString(16).substr(2));
 
         // --- State ---
-        let isAuto = true;
-        let isDemo = false;
-        let demoInterval = null;
+        let currentServerTime = null;
 
-        // Actuators local state for toggling
-        let stFan = false;
-        let stPump = false;
+        setInterval(() => {
+            if (currentServerTime) {
+                currentServerTime.setSeconds(currentServerTime.getSeconds() + 1);
+                // Update Display
+                const h = String(currentServerTime.getHours()).padStart(2, '0');
+                const m = String(currentServerTime.getMinutes()).padStart(2, '0');
+                const s = String(currentServerTime.getSeconds()).padStart(2, '0');
+                document.getElementById("val-time").innerText = `${h}:${m}:${s}`;
+            }
+        }, 1000);
 
-        // --- Chart ---
         // --- Charts ---
-        const commonOptions = {
-            responsive: true,
-            animation: false,
-            scales: { y: { beginAtZero: true } },
-            plugins: { legend: { display: false } } // Hide legend for cleaner look
+        Chart.defaults.color = '#636e72';
+        Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.05)';
+
+        const createGradient = (ctx, color) => {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, color.replace('1)', '0.4)'));
+            gradient.addColorStop(1, color.replace('1)', '0.0)'));
+            return gradient;
         };
 
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 800 },
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                x: { display: false }
+            },
+            plugins: { legend: { display: false } },
+            elements: {
+                point: { radius: 2, hoverRadius: 5 },
+                line: { tension: 0.3, borderWidth: 3 }
+            }
+        };
+
+        // Load Data from LocalStorage
+        const loadChartData = (key) => {
+            const saved = localStorage.getItem(key);
+            return saved ? JSON.parse(saved) : [];
+        };
+
+        const saveChartData = (key, data) => {
+            localStorage.setItem(key, JSON.stringify(data));
+        };
+
+        // Temp Chart
         const ctxT = document.getElementById('tempChart').getContext('2d');
         const tempChart = new Chart(ctxT, {
             type: 'line',
             data: {
                 labels: Array(20).fill(''),
-                datasets: [{ label: 'Temp °C', data: [], borderColor: '#e94560', tension: 0.4, borderWidth: 2, pointRadius: 0 }]
+                datasets: [{
+                    label: 'Temp °C',
+                    data: loadChartData('gg_temp'),
+                    borderColor: '#c0392b',
+                    backgroundColor: createGradient(ctxT, 'rgba(192, 57, 43, 1)'),
+                    fill: true
+                }]
             },
-            options: { ...commonOptions, plugins: { title: { display: true, text: 'Température (°C)', color: '#e94560' } } }
+            options: { ...commonOptions, plugins: { title: { display: true, text: 'Température (°C)', color: '#1e4d2b' } } }
         });
 
+        // Hum Chart
         const ctxH = document.getElementById('humChart').getContext('2d');
         const humChart = new Chart(ctxH, {
             type: 'line',
             data: {
                 labels: Array(20).fill(''),
-                datasets: [{ label: 'Hum %', data: [], borderColor: '#3498db', tension: 0.4, borderWidth: 2, pointRadius: 0 }]
+                datasets: [{
+                    label: 'Hum %',
+                    data: loadChartData('gg_hum'),
+                    borderColor: '#2980b9',
+                    backgroundColor: createGradient(ctxH, 'rgba(41, 128, 185, 1)'),
+                    fill: true
+                }]
             },
-            options: { ...commonOptions, plugins: { title: { display: true, text: 'Humidité (%)', color: '#3498db' } } }
+            options: { ...commonOptions, plugins: { title: { display: true, text: 'Humidité (%)', color: '#1e4d2b' } } }
         });
 
+        // Lux Chart
         const ctxL = document.getElementById('luxChart').getContext('2d');
         const luxChart = new Chart(ctxL, {
             type: 'line',
             data: {
                 labels: Array(20).fill(''),
-                datasets: [{ label: 'Lux', data: [], borderColor: '#f1c40f', tension: 0.4, borderWidth: 2, pointRadius: 0 }]
+                datasets: [{
+                    label: 'Lux',
+                    data: loadChartData('gg_lux'),
+                    borderColor: '#d35400',
+                    backgroundColor: createGradient(ctxL, 'rgba(211, 84, 0, 1)'),
+                    fill: true
+                }]
             },
-            options: { ...commonOptions, plugins: { title: { display: true, text: 'Luminosité (Lux)', color: '#f1c40f' } } }
+            options: { ...commonOptions, plugins: { title: { display: true, text: 'Luminosité (Lux)', color: '#1e4d2b' } } }
         });
 
         // --- Logic ---
@@ -552,19 +621,36 @@
         };
 
         client.onMessageArrived = (msg) => {
+            console.log("MQTT Recv: " + msg.payloadString);
+
+            // Handle Alarm Topic
+            if (msg.destinationName === topicAlarm) {
+                const alarmState = msg.payloadString;
+                const alertBox = document.getElementById("alert-box");
+                const audio = document.getElementById("alarm-sound");
+
+                if (alarmState === "ON") {
+                    alertBox.style.display = "block";
+                    audio.play().catch(e => console.log("Audio play failed (user interaction needed first):", e));
+                } else {
+                    alertBox.style.display = "none";
+                    audio.pause();
+                    audio.currentTime = 0;
+                }
+                return;
+            }
+
             if (msg.destinationName === topicData) {
                 const data = JSON.parse(msg.payloadString);
                 updateUI(data);
-            } else if (msg.destinationName === topicAlarm) {
-                alert("🚨 ALERTE : " + msg.payloadString);
             }
         };
 
         function updateUI(data) {
-            // Update Inputs only if user is not typing in them
-            if (document.activeElement.id !== "val-temp") document.getElementById("val-temp").value = data.temp.toFixed(1);
-            if (document.activeElement.id !== "val-hum") document.getElementById("val-hum").value = data.hum.toFixed(0);
-            if (document.activeElement.id !== "val-lux") document.getElementById("val-lux").value = data.lux;
+            // Update Values
+            document.getElementById("val-temp").innerText = data.temp.toFixed(1);
+            document.getElementById("val-hum").innerText = data.hum.toFixed(0);
+            document.getElementById("val-lux").innerText = data.lux;
 
             // Status
             setClass("st-heat", data.heat);
@@ -572,20 +658,44 @@
             setClass("st-pump", data.pump);
             setClass("st-light", data.light);
 
-            // Sync States
-            stFan = data.fan;
-            stPump = data.pump;
-            isAuto = data.auto;
+            // Motion Status (special styling)
+            setMotionClass("st-motion", data.motion);
 
             // Update Charts
-            function updateChartData(chart, val) {
+            function updateChartData(chart, val, key) {
                 if (chart.data.datasets[0].data.length > 20) chart.data.datasets[0].data.shift();
                 chart.data.datasets[0].data.push(val);
                 chart.update();
+                saveChartData(key, chart.data.datasets[0].data);
             }
-            updateChartData(tempChart, data.temp);
-            updateChartData(humChart, data.hum);
-            updateChartData(luxChart, data.lux);
+            updateChartData(tempChart, data.temp, 'gg_temp');
+            updateChartData(humChart, data.hum, 'gg_hum');
+            updateChartData(luxChart, data.lux, 'gg_lux');
+
+            // Time & Day/Night
+            if (data.time && data.time !== "--:--:--") {
+                const parts = data.time.split(':');
+                const now = new Date();
+                now.setHours(parseInt(parts[0]));
+                now.setMinutes(parseInt(parts[1]));
+                now.setSeconds(parseInt(parts[2]));
+                currentServerTime = now;
+
+                document.getElementById("val-time").innerText = data.time;
+            }
+
+            const dnSpan = document.getElementById("val-daynight");
+            if (data.isNight) {
+                dnSpan.innerText = "NUIT";
+                dnSpan.style.background = "#2c3e50";
+                dnSpan.style.color = "#ecf0f1";
+                dnSpan.innerHTML = '<i class="fas fa-moon"></i> NUIT';
+            } else {
+                dnSpan.innerText = "JOUR";
+                dnSpan.style.background = "#f1c40f";
+                dnSpan.style.color = "#2c3e50";
+                dnSpan.innerHTML = '<i class="fas fa-sun"></i> JOUR';
+            }
         }
 
         function setClass(id, isActive) {
@@ -599,68 +709,74 @@
             }
         }
 
-        // --- Commands ---
-
-        // --- Commands ---
-        // (Manual controls removed)
-
-        function sendCmd(cmd) {
-            let message = new Paho.MQTT.Message(cmd);
-            message.destinationName = topicControl;
-            client.send(message);
+        function setMotionClass(id, isActive) {
+            const el = document.getElementById(id);
+            el.classList.remove("inactive", "active", "motion-active");
+            if (isActive) {
+                el.classList.add("motion-active");
+            } else {
+                el.classList.add("inactive");
+            }
         }
 
-        // --- Simulation (God Mode: Direct Click) ---
-        function setLuxMode(mode) {
-            const input = document.getElementById("val-lux");
-            if (mode === 'DAY') input.value = 5000;
-            if (mode === 'NIGHT') input.value = 100;
-            sendDirectSim();
+        // --- Time Demo Functions ---
+        function setTimeDemo(hour) {
+            // 1. Activate Time Demo Mode
+            let msgMode = new Paho.MQTT.Message("TIME_DEMO_ON");
+            msgMode.destinationName = topicControl;
+            client.send(msgMode);
+
+            // 2. Set Hour
+            let msgHour = new Paho.MQTT.Message("SET_HOUR:" + hour);
+            msgHour.destinationName = topicControl;
+            client.send(msgHour);
+
+            console.log("🕒 Time Demo set to:", hour + "h");
+
+            // UI Feedback
+            updateTimeButtons(hour === 12 ? 'day' : 'night');
         }
 
-        function sendDirectSim() {
-            const t = parseFloat(document.getElementById("val-temp").value);
-            const h = parseFloat(document.getElementById("val-hum").value);
-            const l = parseFloat(document.getElementById("val-lux").value);
+        function setRealTime() {
+            let msgMode = new Paho.MQTT.Message("TIME_DEMO_OFF");
+            msgMode.destinationName = topicControl;
+            client.send(msgMode);
 
-            // 1. Instant Local Update (UX)
-            if (!isNaN(t)) {
-                if (tempChart.data.datasets[0].data.length > 20) tempChart.data.datasets[0].data.shift();
-                tempChart.data.datasets[0].data.push(t);
-                tempChart.update();
-            }
-            if (!isNaN(h)) {
-                if (humChart.data.datasets[0].data.length > 20) humChart.data.datasets[0].data.shift();
-                humChart.data.datasets[0].data.push(h);
-                humChart.update();
-            }
-            if (!isNaN(l)) {
-                if (luxChart.data.datasets[0].data.length > 20) luxChart.data.datasets[0].data.shift();
-                luxChart.data.datasets[0].data.push(l);
-                luxChart.update();
-            }
+            console.log("🕒 Back to Real Time");
+            updateTimeButtons('auto');
+        }
 
-            // 2. Predictive Status Update (Instant Feedback)
-            // Read current thresholds
-            const minT = parseFloat(document.getElementById("set-min-t").value);
-            const maxT = parseFloat(document.getElementById("set-max-t").value);
-            const minH = parseFloat(document.getElementById("set-min-h").value);
-            const minL = parseFloat(document.getElementById("set-min-l").value);
+        function updateTimeButtons(mode) {
+            document.getElementById("btn-sim-day").classList.remove("active");
+            document.getElementById("btn-sim-night").classList.remove("active");
+            document.getElementById("btn-sim-auto").classList.remove("active");
 
-            // Apply Logic Locally for UI
-            if (!isNaN(t)) {
-                setClass("st-heat", t < minT);
-                setClass("st-fan", t > maxT);
+            if (mode === 'day') document.getElementById("btn-sim-day").classList.add("active");
+            if (mode === 'night') document.getElementById("btn-sim-night").classList.add("active");
+            if (mode === 'auto') document.getElementById("btn-sim-auto").classList.add("active");
+        }
+
+        let simulationActive = false;
+
+        function toggleSimulation() {
+            simulationActive = !simulationActive;
+            const btn = document.getElementById("btn-simulate");
+
+            if (simulationActive) {
+                let msg = new Paho.MQTT.Message("SIM_ON");
+                msg.destinationName = topicControl;
+                client.send(msg);
+                btn.classList.add("active");
+                btn.innerHTML = '<i class="fas fa-magic"></i> Simulation ON';
+                console.log("✨ Simulation Mode ON");
+            } else {
+                let msg = new Paho.MQTT.Message("SIM_OFF");
+                msg.destinationName = topicControl;
+                client.send(msg);
+                btn.classList.remove("active");
+                btn.innerHTML = '<i class="fas fa-magic"></i> Simuler Effets';
+                console.log("✨ Simulation Mode OFF");
             }
-            if (!isNaN(h)) setClass("st-pump", h < minH);
-            if (!isNaN(l)) setClass("st-light", l < minL);
-
-            // Send to ESP32 (Auto-enables simulation mode)
-            const payload = JSON.stringify({ active: true, t: t, h: h, l: l });
-            let message = new Paho.MQTT.Message(payload);
-            message.destinationName = "greenguard/simulation";
-            client.send(message);
-            console.log("🧞 God Mode Direct:", t, h, l);
         }
 
         // --- Sidebar Logic ---
@@ -672,11 +788,10 @@
             document.getElementById("mySidebar").style.width = "0";
         }
 
-        // --- Settings & Demo ---
+        // --- Settings ---
         let debounceTimer = null;
 
         function pushSettings() {
-            // Debounce: wait 1s before sending
             if (debounceTimer) clearTimeout(debounceTimer);
 
             const minT = parseFloat(document.getElementById("set-min-t").value);
@@ -698,65 +813,6 @@
                 console.log("📨 SENT:", payload);
             }, 1000);
         }
-
-        function toggleDemo() {
-            isDemo = !isDemo;
-            const btn = document.getElementById("btn-demo");
-            const lbl = document.getElementById("lbl-demo");
-
-            if (isDemo) {
-                btn.style.animation = "pulse 1s infinite";
-                lbl.innerText = "DEMO ACTIVE";
-                lbl.innerText = "DEMO ACTIVE";
-
-                // Chaos Mode: Change SENSORS randomly every 3 seconds (Hardware reacts to this)
-                demoInterval = setInterval(() => {
-                    // Random Sensor Values
-                    const rTemp = (18 + Math.random() * 15).toFixed(1); // 18-33°C
-                    const rHum = (30 + Math.random() * 50).toFixed(0);  // 30-80%
-                    const rLux = (Math.random() > 0.5) ? 4500 : 500;    // Day or Night
-
-                    // Update inputs visual
-                    document.getElementById("val-temp").value = rTemp;
-                    document.getElementById("val-hum").value = rHum;
-                    document.getElementById("val-lux").value = rLux;
-
-                    // Trigger Simulation
-                    sendDirectSim();
-                    console.log("🎲 Demo Sim:", rTemp, rHum, rLux);
-                }, 3000);
-
-            } else {
-                btn.style.animation = "none";
-                lbl.innerText = "DEMO OFF";
-                clearInterval(demoInterval);
-            }
-        }
-
-        // --- Chart Keep-Alive (Every 10s) ---
-        setInterval(() => {
-            // Push same last value if no update to keep chart moving time-wise
-            const t = parseFloat(document.getElementById("val-temp").value);
-            const h = parseFloat(document.getElementById("val-hum").value);
-            const l = parseFloat(document.getElementById("val-lux").value);
-
-            if (!isNaN(t)) {
-                if (tempChart.data.datasets[0].data.length > 20) tempChart.data.datasets[0].data.shift();
-                tempChart.data.datasets[0].data.push(t);
-                tempChart.update();
-            }
-            if (!isNaN(h)) {
-                if (humChart.data.datasets[0].data.length > 20) humChart.data.datasets[0].data.shift();
-                humChart.data.datasets[0].data.push(h);
-                humChart.update();
-            }
-            if (!isNaN(l)) {
-                if (luxChart.data.datasets[0].data.length > 20) luxChart.data.datasets[0].data.shift();
-                luxChart.data.datasets[0].data.push(l);
-                luxChart.update();
-            }
-        }, 10000);
-
 
         // Init
         connect();

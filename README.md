@@ -66,4 +66,3 @@ Ce projet est conçu pour **Wokwi** et démontre une gestion multitâche complex
 *   **Port** : 1883 (ESP32) / 8083 (WebSockets)
 *   **Topics** : `greenguard/data`, `greenguard/control`, `greenguard/alarm`
 
-*Projet généré par Antigravity AI*
